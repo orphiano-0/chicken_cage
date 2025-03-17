@@ -46,7 +46,6 @@ class MainActivity : AppCompatActivity() {
                         false
                     }
                 }
-
                 DragEvent.ACTION_DRAG_ENTERED,
                 DragEvent.ACTION_DRAG_LOCATION,
                 DragEvent.ACTION_DRAG_EXITED -> true
