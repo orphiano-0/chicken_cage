@@ -19,6 +19,7 @@ class MainActivity : AppCompatActivity() {
     private var lastDroppedX = 0f
     private var lastDroppedY = 0f
     private lateinit var mediaPlayer: MediaPlayer
+    private lateinit var countTime : CountDownTimer
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +37,8 @@ class MainActivity : AppCompatActivity() {
             v.startDragAndDrop(item, shadowBuilder, v, 0)
             true
         }
+
+
 
         val mainLayout: View = findViewById(R.id.main)
         mainLayout.setOnDragListener { v, event ->
@@ -56,6 +59,7 @@ class MainActivity : AppCompatActivity() {
                             mediaPlayer.isLooping = true
                             mediaPlayer.start()
                             countDown.setText("Chicken is out!")
+                            countTime.cancel()
                         }
                         cage.setBackgroundResource(R.drawable.cage_outline)
 
@@ -66,10 +70,14 @@ class MainActivity : AppCompatActivity() {
                         }
                         cage.setBackgroundResource(R.drawable.cage_outline_open)
 
-                        object: CountDownTimer(30000, 1000) {
+                        // to stop doubling of the timer
+                        if (this@MainActivity::countTime.isInitialized) {
+                            countTime.cancel()
+                        }
+
+                        countTime = object : CountDownTimer(30000, 1000) {
                             override fun onTick(millisUntilFinished: Long) {
                                 countDown.setText("Second remaining: " + millisUntilFinished / 1000)
-
                             }
                             override fun onFinish() {
                                 val parentWidth = mainLayout.width
@@ -80,9 +88,11 @@ class MainActivity : AppCompatActivity() {
                                 imageView.y = randomY
                                 cage.setBackgroundResource(R.drawable.cage_outline)
                                 imageView.startAnimation(shake)
+                                countDown.setText("Chicken is out!")
                                 mediaPlayer.start()
                             }
-                        }.start()
+                        }
+                        countTime.start()
                     }
                     lastDroppedX = x
                     lastDroppedY = y
