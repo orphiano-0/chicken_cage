@@ -2,7 +2,6 @@ package com.example.chickencage
 
 import android.content.ClipData
 import android.content.ClipDescription
-import android.content.IntentSender
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -28,6 +27,8 @@ class MainActivity : AppCompatActivity() {
         val imageView: ImageView = findViewById(R.id.imageView)
         val cage: View = findViewById(R.id.cage)
         val countDown: TextView = findViewById(R.id.countDownTimer)
+        val shake: Animation = AnimationUtils.loadAnimation(this, R.anim.shake)
+        mediaPlayer = MediaPlayer.create(this, R.raw.rooster_crowing)
 
         imageView.setOnLongClickListener { v ->
             val item = ClipData.newPlainText("image", "Draggable Image")
@@ -40,14 +41,8 @@ class MainActivity : AppCompatActivity() {
         mainLayout.setOnDragListener { v, event ->
             when (event.action) {
                 DragEvent.ACTION_DRAG_STARTED -> {
-                    if (event.clipDescription.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)) {
-                        true
-                    } else {
-                        false
-                    }
+                    event.clipDescription.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)
                 }
-                DragEvent.ACTION_DRAG_ENTERED,
-                DragEvent.ACTION_DRAG_LOCATION,
                 DragEvent.ACTION_DRAG_EXITED -> true
                 DragEvent.ACTION_DROP -> {
                     val x = event.x
@@ -56,13 +51,11 @@ class MainActivity : AppCompatActivity() {
                     imageView.y = y - imageView.height / 2
 
                     if (x < cage.x || x > cage.x + cage.width || y < cage.y || y > cage.y + cage.height) {
-                        val shake: Animation = AnimationUtils.loadAnimation(this, R.anim.shake)
                         imageView.startAnimation(shake)
-
-                        mediaPlayer = MediaPlayer.create(this, R.raw.rooster_crowing)
                         if (!mediaPlayer.isPlaying) {
                             mediaPlayer.isLooping = true
                             mediaPlayer.start()
+                            countDown.setText("Chicken is out!")
                         }
                         cage.setBackgroundResource(R.drawable.cage_outline)
 
@@ -76,6 +69,7 @@ class MainActivity : AppCompatActivity() {
                         object: CountDownTimer(30000, 1000) {
                             override fun onTick(millisUntilFinished: Long) {
                                 countDown.setText("Second remaining: " + millisUntilFinished / 1000)
+
                             }
                             override fun onFinish() {
                                 val parentWidth = mainLayout.width
@@ -85,6 +79,8 @@ class MainActivity : AppCompatActivity() {
                                 imageView.x = randomX
                                 imageView.y = randomY
                                 cage.setBackgroundResource(R.drawable.cage_outline)
+                                imageView.startAnimation(shake)
+                                mediaPlayer.start()
                             }
                         }.start()
                     }
